@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { Track } from '../types/music';
 import { toast } from "sonner";
@@ -54,6 +53,7 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
     audio.addEventListener('loadedmetadata', () => {
       setDuration(audio.duration);
+      console.log("Audio metadata loaded, duration:", audio.duration);
     });
 
     audio.addEventListener('ended', () => {
@@ -65,9 +65,19 @@ export function AudioProvider({ children }: AudioProviderProps) {
     });
 
     audio.addEventListener('error', (e) => {
-      console.error("Audio error:", e);
+      const error = e.target as HTMLAudioElement;
+      console.error("Audio error:", error.error);
       toast.error("Failed to play track. Please try another.");
       setIsPlaying(false);
+    });
+
+    audio.addEventListener('canplay', () => {
+      console.log("Audio can play now");
+    });
+
+    audio.addEventListener('playing', () => {
+      console.log("Audio is now playing");
+      setIsPlaying(true);
     });
 
     return () => {
@@ -79,25 +89,35 @@ export function AudioProvider({ children }: AudioProviderProps) {
 
   const playTrack = (track: Track) => {
     if (audioRef.current) {
-      // Set the source first
+      console.log("Attempting to play track:", track.name, "URL:", track.audioUrl);
+      
+      // Stop any current playback first
+      audioRef.current.pause();
+      
+      // Set the source
       audioRef.current.src = track.audioUrl;
       
       // Set volume before playing
       audioRef.current.volume = volume;
       
-      // Try to play
-      const playPromise = audioRef.current.play();
+      // Pre-load the audio
+      audioRef.current.load();
       
-      if (playPromise !== undefined) {
-        playPromise.then(() => {
-          setCurrentTrack(track);
-          setIsPlaying(true);
-          toast.success(`Now playing: ${track.name}`);
-        }).catch(error => {
-          console.error("Playback failed:", error);
-          toast.error("Couldn't play this track. Try another one.");
-        });
-      }
+      // Try to play after a short delay to allow loading
+      setTimeout(() => {
+        const playPromise = audioRef.current?.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            setCurrentTrack(track);
+            setIsPlaying(true);
+            toast.success(`Now playing: ${track.name}`);
+          }).catch(error => {
+            console.error("Playback failed:", error);
+            toast.error("Couldn't play this track. Try another one.");
+          });
+        }
+      }, 100);
     }
   };
 
@@ -156,8 +176,6 @@ export function AudioProvider({ children }: AudioProviderProps) {
   };
 
   const prevTrack = () => {
-    // This would ideally go back to the previous track
-    // For simplicity, just restart the current track
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       setCurrentTime(0);

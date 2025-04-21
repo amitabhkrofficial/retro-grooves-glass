@@ -1,8 +1,16 @@
-
 import { Track, Playlist, Artist } from '../types/music';
 
-// Placeholder images and mock data since we're using a fake API
-// In a real implementation, these would come from the actual API
+// Updated audio sources using the Free Music Archive API samples
+const mockAudioUrls = [
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/WFMU/Broke_For_Free/Directionless_EP/Broke_For_Free_-_01_-_Night_Owl.mp3',
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3',
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Chad_Crouch/Arps/Chad_Crouch_-_Shipping_Lanes.mp3',
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/Music_for_Video/Podington_Bear/Solo_Instruments/Podington_Bear_-_Solo_Guitar.mp3',
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_07_-_Downfall.mp3',
+  'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/Creative_Commons/Ketsa/Raising_Frequency/Ketsa_-_08_-_Multiverse.mp3'
+];
+
+// Placeholder images and mock data
 const mockAlbumCovers = [
   'https://images.unsplash.com/photo-1496293455970-f8581aae0e3b?q=80&w=200&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1557672172-298e090bd0f1?q=80&w=200&auto=format&fit=crop',
@@ -19,88 +27,76 @@ const artistImages = [
   'https://images.unsplash.com/photo-1593697972672-b1c1909be7f9?q=80&w=200&auto=format&fit=crop'
 ];
 
-// We'll use Jamendo API for this project - generating mock data first
-// In a real implementation, we'd fetch this data from Jamendo API endpoints
-
-const mockAudioUrls = [
-  'https://cdn.freesound.org/previews/624/624642_13710561-lq.mp3',
-  'https://cdn.freesound.org/previews/624/624693_13710561-lq.mp3',
-  'https://cdn.freesound.org/previews/624/624717_13710561-lq.mp3',
-  'https://cdn.freesound.org/previews/659/659599_12829118-lq.mp3',
-  'https://cdn.freesound.org/previews/678/678883_5674468-lq.mp3',
-  'https://cdn.freesound.org/previews/670/670053_1089955-lq.mp3'
-];
-
-// Mock data for development and testing
+// Mock data with updated audio sources
 const mockTracks: Track[] = [
   {
     id: '1',
-    name: 'Retro Synth Wave',
-    artist: 'Neon Dreams',
-    album: 'Digital Sunset',
+    name: 'Night Owl',
+    artist: 'Broke For Free',
+    album: 'Directionless EP',
     albumArt: mockAlbumCovers[0],
     audioUrl: mockAudioUrls[0],
     duration: 185
   },
   {
     id: '2',
-    name: 'Pixel Rain',
-    artist: 'Arcade Heroes',
-    album: '8-Bit Memories',
+    name: 'Enthusiast',
+    artist: 'Tours',
+    album: 'Enthusiast',
     albumArt: mockAlbumCovers[1],
     audioUrl: mockAudioUrls[1],
     duration: 221
   },
   {
     id: '3',
-    name: 'Midnight Drive',
-    artist: 'Neon Dreams',
-    album: 'Digital Sunset',
-    albumArt: mockAlbumCovers[0],
+    name: 'Shipping Lanes',
+    artist: 'Chad Crouch',
+    album: 'Arps',
+    albumArt: mockAlbumCovers[2],
     audioUrl: mockAudioUrls[2],
     duration: 197
   },
   {
     id: '4',
-    name: 'Lost Signals',
-    artist: 'Data Flow',
-    album: 'Transmission',
-    albumArt: mockAlbumCovers[2],
+    name: 'Solo Guitar',
+    artist: 'Podington Bear',
+    album: 'Solo Instruments',
+    albumArt: mockAlbumCovers[3],
     audioUrl: mockAudioUrls[3],
     duration: 210
   },
   {
     id: '5',
-    name: 'Cassette Dreams',
-    artist: 'Analog Wave',
-    album: 'Rewind',
-    albumArt: mockAlbumCovers[3],
+    name: 'Downfall',
+    artist: 'Kai Engel',
+    album: 'Satin',
+    albumArt: mockAlbumCovers[4],
     audioUrl: mockAudioUrls[4],
     duration: 245
   },
   {
     id: '6',
-    name: 'Static Memories',
-    artist: 'The Glitchers',
-    album: 'Broken Code',
-    albumArt: mockAlbumCovers[4],
+    name: 'Multiverse',
+    artist: 'Ketsa',
+    album: 'Raising Frequency',
+    albumArt: mockAlbumCovers[5],
     audioUrl: mockAudioUrls[5],
     duration: 178
   },
   {
     id: '7',
-    name: 'CRT Glow',
-    artist: 'Arcade Heroes',
-    album: '8-Bit Memories',
+    name: 'Enthusiast (Remix)',
+    artist: 'Tours',
+    album: 'Enthusiast',
     albumArt: mockAlbumCovers[1],
-    audioUrl: mockAudioUrls[2],
+    audioUrl: mockAudioUrls[1],
     duration: 203
   },
   {
     id: '8',
-    name: 'Space Highway',
-    artist: 'Neon Dreams',
-    album: 'Digital Sunset',
+    name: 'Night Owl (Extended)',
+    artist: 'Broke For Free',
+    album: 'Directionless EP',
     albumArt: mockAlbumCovers[0],
     audioUrl: mockAudioUrls[0],
     duration: 192
