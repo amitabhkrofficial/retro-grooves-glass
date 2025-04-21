@@ -1,6 +1,7 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { Track } from '../types/music';
+import { toast } from "sonner";
 
 interface AudioContextType {
   currentTrack: Track | null;
@@ -35,17 +36,17 @@ interface AudioProviderProps {
 }
 
 export function AudioProvider({ children }: AudioProviderProps) {
-  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
-  const [volume, setVolume] = useState(0.7);
+  const [volume, setVolumeState] = useState(0.7);
   const [queue, setQueue] = useState<Track[]>([]);
 
   useEffect(() => {
     const audio = new Audio();
-    setAudioElement(audio);
+    audioRef.current = audio;
 
     audio.addEventListener('timeupdate', () => {
       setCurrentTime(audio.currentTime);
@@ -63,54 +64,87 @@ export function AudioProvider({ children }: AudioProviderProps) {
       }
     });
 
+    audio.addEventListener('error', (e) => {
+      console.error("Audio error:", e);
+      toast.error("Failed to play track. Please try another.");
+      setIsPlaying(false);
+    });
+
     return () => {
       audio.pause();
       audio.src = '';
+      audio.remove();
     };
   }, []);
 
-  useEffect(() => {
-    if (audioElement) {
-      audioElement.volume = volume;
-    }
-  }, [volume, audioElement]);
-
   const playTrack = (track: Track) => {
-    if (audioElement) {
-      setCurrentTrack(track);
-      audioElement.src = track.audioUrl;
-      audioElement.play().catch(error => console.error("Playback failed:", error));
-      setIsPlaying(true);
+    if (audioRef.current) {
+      // Set the source first
+      audioRef.current.src = track.audioUrl;
+      
+      // Set volume before playing
+      audioRef.current.volume = volume;
+      
+      // Try to play
+      const playPromise = audioRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setCurrentTrack(track);
+          setIsPlaying(true);
+          toast.success(`Now playing: ${track.name}`);
+        }).catch(error => {
+          console.error("Playback failed:", error);
+          toast.error("Couldn't play this track. Try another one.");
+        });
+      }
     }
   };
 
   const pauseTrack = () => {
-    if (audioElement && isPlaying) {
-      audioElement.pause();
+    if (audioRef.current && isPlaying) {
+      audioRef.current.pause();
       setIsPlaying(false);
     }
   };
 
   const resumeTrack = () => {
-    if (audioElement && currentTrack && !isPlaying) {
-      audioElement.play().catch(error => console.error("Resume failed:", error));
-      setIsPlaying(true);
+    if (audioRef.current && currentTrack && !isPlaying) {
+      const playPromise = audioRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          setIsPlaying(true);
+        }).catch(error => {
+          console.error("Resume failed:", error);
+          toast.error("Failed to resume playback.");
+        });
+      }
     }
   };
 
   const seekTo = (time: number) => {
-    if (audioElement) {
-      audioElement.currentTime = time;
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
       setCurrentTime(time);
+    }
+  };
+
+  const setVolume = (newVolume: number) => {
+    setVolumeState(newVolume);
+    if (audioRef.current) {
+      audioRef.current.volume = newVolume;
     }
   };
 
   const addToQueue = (track: Track) => {
     setQueue(prevQueue => [...prevQueue, track]);
+    toast.success(`Added ${track.name} to queue`);
   };
 
   const clearQueue = () => {
     setQueue([]);
+    toast.info("Queue cleared");
   };
 
   const nextTrack = () => {
@@ -124,8 +158,8 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const prevTrack = () => {
     // This would ideally go back to the previous track
     // For simplicity, just restart the current track
-    if (audioElement) {
-      audioElement.currentTime = 0;
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
       setCurrentTime(0);
     }
   };

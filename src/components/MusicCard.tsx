@@ -1,7 +1,8 @@
 
-import { Play } from 'lucide-react';
+import { Play, ListPlus } from 'lucide-react';
 import { Track, Playlist } from '../types/music';
 import { useAudio } from '../context/AudioContext';
+import { toast } from 'sonner';
 
 interface MusicCardProps {
   item: Track | Playlist;
@@ -9,7 +10,7 @@ interface MusicCardProps {
 }
 
 const MusicCard = ({ item, type }: MusicCardProps) => {
-  const { playTrack, currentTrack, isPlaying, pauseTrack, resumeTrack } = useAudio();
+  const { playTrack, currentTrack, isPlaying, pauseTrack, resumeTrack, addToQueue } = useAudio();
   
   const handlePlay = () => {
     if (type === 'track') {
@@ -19,8 +20,30 @@ const MusicCard = ({ item, type }: MusicCardProps) => {
       } else {
         playTrack(track);
       }
+    } else if (type === 'playlist') {
+      const playlist = item as Playlist;
+      if (playlist.tracks.length > 0) {
+        playTrack(playlist.tracks[0]);
+        // Add the rest of the tracks to the queue
+        playlist.tracks.slice(1).forEach(track => {
+          addToQueue(track);
+        });
+        toast.success(`Playing playlist: ${playlist.name}`);
+      }
     }
-    // For playlists, would need to implement playlist playing functionality
+  };
+
+  const handleAddToQueue = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (type === 'track') {
+      addToQueue(item as Track);
+    } else if (type === 'playlist') {
+      const playlist = item as Playlist;
+      playlist.tracks.forEach(track => {
+        addToQueue(track);
+      });
+      toast.success(`Added ${playlist.name} to queue`);
+    }
   };
   
   const isCurrentlyPlaying = type === 'track' && currentTrack?.id === item.id && isPlaying;
@@ -58,6 +81,12 @@ const MusicCard = ({ item, type }: MusicCardProps) => {
             ) : (
               <Play size={20} className="text-black ml-1" />
             )}
+          </button>
+          <button
+            onClick={handleAddToQueue}
+            className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-black/70 flex items-center justify-center hover:bg-retro-purple/80 transition-colors"
+          >
+            <ListPlus size={16} className="text-white" />
           </button>
         </div>
       </div>
