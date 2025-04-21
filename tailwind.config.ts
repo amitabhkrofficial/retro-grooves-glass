@@ -61,6 +61,14 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				retro: {
+					purple: '#6B46C1',
+					teal: '#38B2AC',
+					pink: '#D53F8C',
+					neon: '#00FFCA',
+					dark: '#221F26',
+					light: '#F1F0FB'
 				}
 			},
 			borderRadius: {
@@ -84,11 +92,27 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-glow': {
+					'0%, 100%': {
+						opacity: '1',
+						filter: 'brightness(100%)'
+					},
+					'50%': {
+						opacity: '0.8',
+						filter: 'brightness(150%)'
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 3s ease-in-out infinite'
+			},
+			fontFamily: {
+				'retro': ['VT323', 'monospace'],
+				'pixel': ['Press Start 2P', 'cursive'],
+				'digital': ['Orbitron', 'sans-serif']
 			}
 		}
 	},
