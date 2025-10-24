@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { useAudio } from '../context/AudioContext';
 

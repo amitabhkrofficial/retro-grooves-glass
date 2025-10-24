@@ -42,6 +42,13 @@ export function AudioProvider({ children }: AudioProviderProps) {
   const [duration, setDuration] = useState(0);
   const [volume, setVolumeState] = useState(0.7);
   const [queue, setQueue] = useState<Track[]>([]);
+  
+  // Use ref to store latest queue value to avoid stale closures
+  const queueRef = useRef<Track[]>([]);
+  
+  useEffect(() => {
+    queueRef.current = queue;
+  }, [queue]);
 
   useEffect(() => {
     const audio = new Audio();
@@ -57,8 +64,25 @@ export function AudioProvider({ children }: AudioProviderProps) {
     });
 
     audio.addEventListener('ended', () => {
-      if (queue.length > 0) {
-        nextTrack();
+      // Use ref to get latest queue value
+      if (queueRef.current.length > 0) {
+        const nextTrack = queueRef.current[0];
+        setQueue(queueRef.current.slice(1));
+        // Play the next track
+        if (audioRef.current) {
+          audioRef.current.src = nextTrack.audioUrl;
+          audioRef.current.load();
+          const playPromise = audioRef.current.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              setCurrentTrack(nextTrack);
+              setIsPlaying(true);
+            }).catch(error => {
+              console.error("Auto-play next track failed:", error);
+              setIsPlaying(false);
+            });
+          }
+        }
       } else {
         setIsPlaying(false);
       }

@@ -1,11 +1,12 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import TopBar from '../components/TopBar';
 import SideBar from '../components/SideBar';
 import MusicCard from '../components/MusicCard';
 import NowPlaying from '../components/NowPlaying';
-import { Track, Artist } from '../types/music';
+import SearchResults from '../components/SearchResults';
+import { Track } from '../types/music';
 import { MusicAPI } from '../services/api';
 
 const Explore = () => {
@@ -45,27 +46,7 @@ const Explore = () => {
                 <div className="animate-pulse text-white font-retro">Loading...</div>
               </div>
             ) : searchResults ? (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-digital text-white">Search Results</h2>
-                  <button 
-                    onClick={clearSearch}
-                    className="text-xs text-white/70 hover:text-white underline"
-                  >
-                    Clear
-                  </button>
-                </div>
-                
-                {searchResults.length === 0 ? (
-                  <p className="text-white/70 text-center py-10">No results found. Try a different search term.</p>
-                ) : (
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                    {searchResults.map(track => (
-                      <MusicCard key={track.id} item={track} type="track" />
-                    ))}
-                  </div>
-                )}
-              </>
+              <SearchResults results={searchResults} onClearSearch={clearSearch} />
             ) : (
               <>
                 <div className="mb-8">

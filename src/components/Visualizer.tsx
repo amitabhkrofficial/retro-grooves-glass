@@ -1,5 +1,5 @@
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAudio } from '../context/AudioContext';
 
 const Visualizer = () => {
@@ -9,26 +9,49 @@ const Visualizer = () => {
   const analyserRef = useRef<AnalyserNode | null>(null);
   const dataArrayRef = useRef<Uint8Array | null>(null);
   const animationFrameRef = useRef<number>(0);
+  const [isInitialized, setIsInitialized] = useState(false);
   
   useEffect(() => {
-    // Initialize audio context for visualization
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      analyserRef.current.fftSize = 256;
+    // Wait for audio element to exist and only initialize once
+    const initializeAudioContext = () => {
+      if (isInitialized) return;
       
-      const bufferLength = analyserRef.current.frequencyBinCount;
-      dataArrayRef.current = new Uint8Array(bufferLength);
-      
-      // Connect audio element to audio context
-      if (document.querySelector('audio')) {
-        const audioElement = document.querySelector('audio') as HTMLAudioElement;
-        const source = audioContextRef.current.createMediaElementSource(audioElement);
-        source.connect(analyserRef.current);
-        analyserRef.current.connect(audioContextRef.current.destination);
+      const audioElement = document.querySelector('audio') as HTMLAudioElement;
+      if (!audioElement) {
+        // Audio element doesn't exist yet, try again later
+        setTimeout(initializeAudioContext, 500);
+        return;
       }
-    }
-    
+
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
+        analyserRef.current = audioContextRef.current.createAnalyser();
+        analyserRef.current.fftSize = 256;
+        
+        const bufferLength = analyserRef.current.frequencyBinCount;
+        dataArrayRef.current = new Uint8Array(bufferLength);
+        
+        // Only create media element source if not already created
+        try {
+          const source = audioContextRef.current.createMediaElementSource(audioElement);
+          source.connect(analyserRef.current);
+          analyserRef.current.connect(audioContextRef.current.destination);
+          setIsInitialized(true);
+        } catch (err) {
+          // Media element source already exists, this is okay
+          console.log("Media element source already created");
+          setIsInitialized(true);
+        }
+      } catch (error) {
+        console.error("Failed to initialize audio context:", error);
+      }
+    };
+
+    initializeAudioContext();
+  }, [isInitialized]);
+  
+  useEffect(() => {
     // Draw function for the visualization
     const draw = () => {
       if (!canvasRef.current || !analyserRef.current || !dataArrayRef.current) return;
